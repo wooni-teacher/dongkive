@@ -10,23 +10,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gothic+A1:wght@400;600;800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: 한 줄 시간축(월별) 위에 웹앱 카드와 노하우 노트가 섞여 쌓이는 기록장. 관리 모드에서는 같은 화면 위에서 바로 추가·수정. */
+/* Layout: 한 줄 시간축(월별) 위에 여러 종류의 기록 카드가 섞여 쌓이는 기록장. 관리 모드에서는 같은 화면 위에서 바로 추가·수정. */
 :root{
   --paper:#f3f6f8; --card:#ffffff; --ink:#18232e; --muted:#5b6b78; --line:#d5dee5;
-  --mark:#ffd84a; --app:#1f6f8b; --app-soft:#dcedf3; --note:#7a4fb0; --note-soft:#ece4f6;
-  --danger:#b23a3a; --scrim:rgba(16,24,32,.45);
+  --mark:#ffd84a; --danger:#b23a3a; --scrim:rgba(16,24,32,.45);
+  --c0:#1f6f8b; --c0s:#dcedf3;  --c1:#7a4fb0; --c1s:#ece4f6;
+  --c2:#2f7d4f; --c2s:#dcefe3;  --c3:#b0601f; --c3s:#f6e6d8;
   --display:"Do Hyeon","Gothic A1",system-ui,sans-serif;
   --body:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --paper:#11181e; --card:#18222a; --ink:#e6edf2; --muted:#9aaab6; --line:#2a3842;
-  --mark:#e3bd2a; --app:#6cc0dc; --app-soft:#183441; --note:#c3a2ef; --note-soft:#2b2240;
-  --danger:#ec8a8a; --scrim:rgba(0,0,0,.6); color-scheme:dark}}
+  --mark:#e3bd2a; --danger:#ec8a8a; --scrim:rgba(0,0,0,.6);
+  --c0:#6cc0dc; --c0s:#183441; --c1:#c3a2ef; --c1s:#2b2240;
+  --c2:#7fd3a0; --c2s:#183427; --c3:#f0ac6e; --c3s:#3a2716; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#11181e; --card:#18222a; --ink:#e6edf2; --muted:#9aaab6; --line:#2a3842;
-  --mark:#e3bd2a; --app:#6cc0dc; --app-soft:#183441; --note:#c3a2ef; --note-soft:#2b2240;
-  --danger:#ec8a8a; --scrim:rgba(0,0,0,.6); color-scheme:dark}
+  --mark:#e3bd2a; --danger:#ec8a8a; --scrim:rgba(0,0,0,.6);
+  --c0:#6cc0dc; --c0s:#183441; --c1:#c3a2ef; --c1s:#2b2240;
+  --c2:#7fd3a0; --c2s:#183427; --c3:#f0ac6e; --c3s:#3a2716; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;
@@ -34,29 +37,31 @@ body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:
 .wrap{max-width:860px;margin:0 auto;padding-block:28px 64px}
 
 .notice{font-size:13px;color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:8px 12px;margin-bottom:28px}
+.notice.err{color:var(--danger);border-color:var(--danger)}
 
 header{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;border-bottom:3px solid var(--ink);padding-bottom:20px}
 header>div{min-width:0}
 h1{font-family:var(--display);font-weight:400;font-size:clamp(48px,11vw,84px);line-height:1;margin:6px 0 10px;letter-spacing:-.01em}
 h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92%,transparent 92%)}
 .intro{margin:0;max-width:34em;color:var(--muted);text-wrap:pretty}
-.counts{display:flex;gap:18px;font-variant-numeric:tabular-nums}
+.counts{display:flex;flex-wrap:wrap;gap:18px;font-variant-numeric:tabular-nums}
 .counts div{text-align:right}
 .counts b{display:block;font-family:var(--display);font-weight:400;font-size:40px;line-height:1}
 .counts span{font-size:12px;color:var(--muted)}
 
-/* 관리 막대 */
 .adminbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:18px;padding:10px 14px;border-radius:10px;background:var(--ink);color:var(--paper)}
-.adminbar .who{font-size:13px}
+.adminbar .who{font-size:13px;min-width:0;overflow-wrap:anywhere}
 .adminbar .who b{font-weight:800}
 .adminbar .acts{display:flex;gap:8px;flex-wrap:wrap}
 .btn{font:600 14px var(--body);border-radius:8px;padding:7px 14px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink)}
 .btn:hover{border-color:var(--ink)}
+.btn:disabled{opacity:.6;cursor:wait}
 .btn.primary{background:var(--mark);border-color:var(--mark);color:#18232e}
 .btn.ghost{background:transparent;color:inherit;border-color:currentColor;opacity:.85}
+.btn.small{font-size:13px;padding:5px 11px}
 .btn.danger{color:var(--danger);border-color:var(--danger);background:transparent}
 .btn.danger.sure{background:var(--danger);color:var(--card)}
-.btn:focus-visible,.chip:focus-visible,.open:focus-visible,summary:focus-visible,.edit:focus-visible,.linkbtn:focus-visible{outline:2px solid var(--app);outline-offset:2px}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--c0);outline-offset:2px}
 
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:22px 0 8px}
 .filters .label{font-size:12px;color:var(--muted);margin-right:4px;letter-spacing:.04em}
@@ -69,12 +74,11 @@ h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92
 .month h2{font-family:var(--mono);font-weight:500;font-size:14px;color:var(--muted);margin:4px 0 0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);align-self:start}
 .entries{display:grid;gap:12px;min-width:0;border-left:2px solid var(--line);padding-left:20px}
 
-.entry{position:relative;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
-.entry::before{content:"";position:absolute;left:-28px;top:22px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:3px solid var(--app)}
-.entry.note::before{border-color:var(--note)}
+.entry{--k:var(--c0);--ks:var(--c0s);position:relative;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.entry::before{content:"";position:absolute;left:-28px;top:22px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:3px solid var(--k)}
+.k0{--k:var(--c0);--ks:var(--c0s)} .k1{--k:var(--c1);--ks:var(--c1s)} .k2{--k:var(--c2);--ks:var(--c2s)} .k3{--k:var(--c3);--ks:var(--c3s)}
 .top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px}
-.kind{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:2px 8px;border-radius:4px;background:var(--app-soft);color:var(--app)}
-.note .kind{background:var(--note-soft);color:var(--note)}
+.kind{font-family:var(--body);font-weight:700;font-size:11px;letter-spacing:.04em;padding:2px 8px;border-radius:4px;background:var(--ks);color:var(--k)}
 .date{font-family:var(--mono);color:var(--muted)}
 .edit{margin-left:auto;font:600 12px var(--body);color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:2px 10px;cursor:pointer}
 .edit:hover{color:var(--ink);border-color:var(--ink)}
@@ -83,54 +87,71 @@ h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92
 .meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13px}
 .meta span{color:var(--muted)}
 .meta b{color:var(--ink);font-weight:600}
+.files{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:10px;font-size:13px}
+.files>span{font-size:12px;color:var(--muted)}
+.files a{color:var(--k);overflow-wrap:anywhere}
 .foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:12px}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
 .tag{font-size:12px;color:var(--muted)}
 .tag::before{content:"#"}
-.open{font:600 13px var(--body);color:var(--app);text-decoration:none;border:1px solid currentColor;border-radius:6px;padding:4px 10px;white-space:nowrap}
-.open:hover{background:var(--app-soft)}
+.open{font:600 13px var(--body);color:var(--k);text-decoration:none;border:1px solid currentColor;border-radius:6px;padding:4px 10px;white-space:nowrap}
+.open:hover{background:var(--ks)}
 .open.none{color:var(--muted);border-style:dashed}
-.note .open{color:var(--note)}
-.note .open:hover{background:var(--note-soft)}
 
 details{margin-top:10px}
-summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--note);list-style:none}
+summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--k);list-style:none}
 summary::-webkit-details-marker{display:none}
 summary::after{content:" 펼치기"}
 details[open] summary::after{content:" 접기"}
 .body{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);max-width:62ch;overflow-wrap:anywhere}
 .body p{color:var(--ink);margin:0 0 8px}
 .body ol,.body ul{margin:0 0 8px;padding-left:20px}
-.body a{color:var(--note)}
+.body a{color:var(--k)}
 
 .empty{color:var(--muted);margin-top:30px}
 footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
 .linkbtn{font:inherit;color:var(--muted);background:none;border:none;padding:0;text-decoration:underline;cursor:pointer}
 
-/* 편집 창 */
+/* 창 */
 dialog{border:none;border-radius:14px;padding:0;width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 32px);background:var(--card);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
 dialog::backdrop{background:var(--scrim)}
 .dlg{display:grid;grid-template-rows:auto 1fr auto;max-height:calc(100dvh - 32px)}
 .dlg-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
 .dlg-head h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0}
 .x{font-size:22px;line-height:1;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 8px}
-.dlg-body{overflow:auto;padding:18px 20px;display:grid;gap:14px}
+.dlg-body{overflow:auto;padding:18px 20px;display:grid;gap:14px;align-content:start}
 .dlg-foot{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:14px 20px;border-top:1px solid var(--line)}
 .dlg-foot .right{display:flex;gap:8px;margin-left:auto}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .field{display:grid;gap:5px;min-width:0}
-.field>span{font-size:13px;font-weight:600}
-.field small{font-size:12px;color:var(--muted)}
-input[type=text],input[type=url],input[type=date],select,textarea{font:15px var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+.field>span,.fieldset-title{font-size:13px;font-weight:600}
+.field small,.hint{font-size:12px;color:var(--muted)}
+input[type=text],input[type=url],input[type=date],select,textarea{font:15px var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;min-width:0}
 textarea{min-height:170px;resize:vertical;line-height:1.6}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--app);outline-offset:0;border-color:transparent}
-.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;width:max-content}
-.seg label{cursor:pointer}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--c0);outline-offset:0;border-color:transparent}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label{cursor:pointer;position:relative}
 .seg input{position:absolute;opacity:0;pointer-events:none}
-.seg span{display:block;padding:7px 18px;font-weight:600;font-size:14px}
-.seg input:checked+span{background:var(--ink);color:var(--paper)}
-.seg input:focus-visible+span{outline:2px solid var(--app);outline-offset:-2px}
-.msg{font-size:13px;color:var(--danger)}
+.seg span{display:block;padding:6px 14px;font-weight:600;font-size:14px;border:1px solid var(--line);border-radius:8px}
+.seg input:checked+span{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.seg input:focus-visible+span{outline:2px solid var(--c0);outline-offset:2px}
+.msg{font-size:13px;color:var(--danger);margin:0}
+.filerow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}
+.rm{font-size:18px;line-height:1;background:none;border:1px solid var(--line);border-radius:6px;color:var(--muted);cursor:pointer;padding:5px 9px}
+.rm:hover{color:var(--danger);border-color:var(--danger)}
+
+/* 분야·종류 관리 */
+.cfg-sec{display:grid;gap:10px}
+.cfg-sec h3{margin:0;font-size:16px;font-weight:800}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 4px 3px 12px;font-size:14px;font-weight:600;background:var(--paper)}
+.pill small{color:var(--muted);font-weight:400;font-size:12px}
+.pill button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 7px;border-radius:999px}
+.pill button:hover{color:var(--danger);background:var(--card)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--k)}
+.addrow{display:flex;flex-wrap:wrap;gap:8px}
+.addrow input{flex:1 1 160px;width:auto}
+.addrow select{flex:0 1 150px;width:auto}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;font-size:14px;z-index:20;max-width:calc(100vw - 32px)}
 
@@ -142,6 +163,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--app);outline-off
   .entries{padding-left:16px}
   .entry::before{left:-24px}
   .row{grid-template-columns:1fr}
+  .filerow{grid-template-columns:minmax(0,1fr) auto}
+  .filerow input:first-child{grid-column:1 / -1}
 }
 @media (prefers-reduced-motion:no-preference){.entry{transition:border-color .15s}.entry:hover{border-color:var(--muted)}}
 </style>
@@ -156,23 +179,21 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--app);outline-off
       <h1><span class="hl">동카이브</span></h1>
       <p class="intro">교실에서 쓰려고 만든 웹앱과, 만들고 수업하며 배운 것을 시간 순서대로 쌓아 두는 곳입니다.</p>
     </div>
-    <div class="counts">
-      <div><b id="nApp">0</b><span>웹앱</span></div>
-      <div><b id="nNote">0</b><span>노하우</span></div>
-    </div>
+    <div class="counts" id="counts"></div>
   </header>
 
   <div class="adminbar" id="adminbar" hidden>
     <div class="who" id="who"><b>관리 중</b></div>
     <div class="acts">
       <button class="btn primary" id="addBtn" type="button">+ 새 기록</button>
+      <button class="btn ghost" id="cfgBtn" type="button">분야·종류 관리</button>
       <button class="btn ghost" id="exitBtn" type="button">관리 끝내기</button>
     </div>
   </div>
 
   <div class="filters" id="filters" role="group" aria-label="보기 필터"></div>
   <main id="list"></main>
-  <p class="empty" id="empty" hidden>이 조건에 맞는 기록이 아직 없어요.</p>
+  <p class="empty" id="empty" hidden></p>
 
   <footer>
     <span>동카이브</span>
@@ -180,6 +201,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--app);outline-off
   </footer>
 </div>
 
+<!-- 기록 편집 -->
 <dialog id="dlg" aria-labelledby="dlgTitle">
   <form class="dlg" id="form" novalidate>
     <div class="dlg-head">
@@ -189,33 +211,34 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--app);outline-off
     <div class="dlg-body">
       <div class="field">
         <span>종류</span>
-        <div class="seg" role="radiogroup" aria-label="종류">
-          <label><input type="radio" name="kind" id="f-kind-app" value="app" checked><span>웹앱</span></label>
-          <label><input type="radio" name="kind" id="f-kind-note" value="note"><span>노하우</span></label>
-        </div>
+        <div class="seg" id="kindSeg" role="radiogroup" aria-label="종류"></div>
       </div>
       <label class="field"><span>제목</span><input type="text" id="f-title" required placeholder="예: 알파벳 마을"></label>
       <div class="row">
         <label class="field"><span>날짜</span><input type="date" id="f-date" required></label>
-        <label class="field"><span>분야</span>
-          <select id="f-subject"></select>
-        </label>
+        <label class="field"><span>분야</span><select id="f-subject"></select></label>
       </div>
       <label class="field"><span>한 줄 소개</span><input type="text" id="f-desc" placeholder="카드에 보이는 짧은 설명"></label>
-      <label class="field"><span id="urlLabel">앱 주소</span>
-        <input type="url" id="f-url" inputmode="url" placeholder="https://wooni-teacher.github.io/...">
-        <small id="urlHelp">비워 두면 '링크 준비 중'으로 보여요.</small>
+      <label class="field"><span id="urlLabel">주소</span>
+        <input type="url" id="f-url" inputmode="url" placeholder="https://...">
+        <small id="urlHelp"></small>
       </label>
-      <div class="row" id="appOnly">
+      <div class="row" id="linkOnly">
         <label class="field"><span>대상</span><input type="text" id="f-grade" placeholder="예: 5학년"></label>
         <label class="field"><span>만든 도구</span><input type="text" id="f-tool" placeholder="예: Firebase" list="tools"></label>
       </div>
       <datalist id="tools"><option value="HTML"><option value="Firebase"><option value="Apps Script"><option value="React"><option value="Three.js"></datalist>
-      <label class="field"><span>태그</span><input type="text" id="f-tags" placeholder="쉼표로 구분: 복습, 멀티플레이"></label>
       <label class="field" id="bodyField"><span>본문</span>
         <textarea id="f-body" placeholder="빈 줄로 문단을 나눠요.&#10;- 로 시작하면 점 목록&#10;1. 로 시작하면 번호 목록&#10;**굵게** 쓰면 굵은 글씨"></textarea>
         <small>주소(https://…)를 그대로 쓰면 자동으로 링크가 돼요.</small>
       </label>
+      <div class="field">
+        <span class="fieldset-title">첨부 파일</span>
+        <div id="fileRows" style="display:grid;gap:8px"></div>
+        <div><button class="btn small" type="button" id="addFileBtn">+ 첨부 추가</button></div>
+        <small>구글 드라이브 등에 올린 파일의 공유 링크를 붙여 넣어 주세요.</small>
+      </div>
+      <label class="field"><span>태그</span><input type="text" id="f-tags" placeholder="쉼표로 구분: 복습, 멀티플레이"></label>
       <p class="msg" id="formMsg" hidden></p>
     </div>
     <div class="dlg-foot">
@@ -228,12 +251,47 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--app);outline-off
   </form>
 </dialog>
 
+<!-- 분야·종류 관리 -->
+<dialog id="cfg" aria-labelledby="cfgTitle">
+  <div class="dlg">
+    <div class="dlg-head">
+      <h2 id="cfgTitle">분야·종류 관리</h2>
+      <button class="x" type="button" id="cfgClose" aria-label="닫기">×</button>
+    </div>
+    <div class="dlg-body">
+      <section class="cfg-sec">
+        <h3>종류</h3>
+        <div class="pills" id="kindPills"></div>
+        <div class="addrow">
+          <input type="text" id="newKind" placeholder="새 종류 이름 (예: 학습지)">
+          <select id="newKindForm" aria-label="카드 모양">
+            <option value="link">링크 중심</option>
+            <option value="post">글 중심</option>
+          </select>
+          <button class="btn small" type="button" id="addKindBtn">추가</button>
+        </div>
+        <p class="hint">링크 중심: 주소·대상·만든 도구를 보여 줘요. 글 중심: 펼쳐 읽는 본문이 있어요.</p>
+      </section>
+      <section class="cfg-sec">
+        <h3>분야</h3>
+        <div class="pills" id="subjectPills"></div>
+        <div class="addrow">
+          <input type="text" id="newSubject" placeholder="새 분야 이름 (예: 미술)">
+          <button class="btn small" type="button" id="addSubjectBtn">추가</button>
+        </div>
+      </section>
+      <p class="msg" id="cfgMsg" hidden></p>
+    </div>
+    <div class="dlg-foot"><div class="right"><button class="btn primary" type="button" id="cfgDone">닫기</button></div></div>
+  </div>
+</dialog>
+
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 /* =========================================================
    Firebase 연결: 콘솔의 '웹 앱 추가'에서 받은 설정을 붙여 넣으면
-   모든 방문자가 같은 기록을 보게 됩니다.
+   모든 방문자가 같은 기록을 보게 됩니다. (databaseURL 줄 필수)
    비워 두면(null) 미리보기 모드로, 이 브라우저에만 저장돼요.
    ========================================================= */
 const FIREBASE_CONFIG = {
@@ -245,17 +303,11 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "816023735029",
   appId: "1:816023735029:web:5a2d0afbf82cd99c1053bc"
 };
-/* 예시:
-const FIREBASE_CONFIG = {
-  apiKey: "...", authDomain: "dongkive.firebaseapp.com",
-  databaseURL: "https://dongkive-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "dongkive", storageBucket: "...", messagingSenderId: "...", appId: "..."
-};
-   databaseURL 줄이 꼭 있어야 해요. */
-/*
-*/
 
-const SUBJECTS=["국어","영어","수학","사회","과학","실과","체육","학급운영","행사","만들기","기타"];
+const DEFAULT_SETTINGS = {
+  kinds:[{id:"app",label:"웹앱",form:"link"},{id:"note",label:"노하우",form:"post"}],
+  subjects:["국어","영어","수학","사회","과학","실과","체육","학급운영","행사","만들기","기타"]
+};
 
 const SAMPLES = [
   {kind:"app", date:"2026-11-06", subject:"실과", title:"실과 AI 튜터봇", desc:"6학년 실과 시간에 묻고 답하는 AI 튜터 챗봇.", grade:"6학년", tool:"Apps Script", tags:["AI","챗봇"], url:""},
@@ -278,33 +330,46 @@ const SAMPLES = [
   {kind:"app", date:"2026-08-10", subject:"영어", title:"Dokdo", desc:"섬을 돌아다니며 영어 단어를 익히는 오픈월드 어드벤처.", grade:"5·6학년", tool:"Three.js", tags:["단어","3D","RPG"], url:""}
 ].map((r,i)=>({id:"s"+i,...r}));
 
-/* ---------- 저장소 ---------- */
+/* ---------- 기본 도구 ---------- */
 const $=s=>document.querySelector(s);
 const esc=t=>String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"";
-let records=[], admin=false, state={kind:"all",subject:null};
+const clone=o=>JSON.parse(JSON.stringify(o));
+let records=[], settings=clone(DEFAULT_SETTINGS), admin=false, state={kind:"all",subject:null};
 try{const s=JSON.parse(localStorage.getItem("dk-filter")||"null");if(s&&s.kind)state=s}catch(e){}
 
+function normSettings(s){
+  const out=clone(DEFAULT_SETTINGS);
+  if(s&&Array.isArray(s.kinds)&&s.kinds.length) out.kinds=s.kinds.filter(k=>k&&k.id&&k.label).map(k=>({id:k.id,label:k.label,form:k.form==="post"?"post":"link"}));
+  if(s&&Array.isArray(s.subjects)) out.subjects=s.subjects.filter(Boolean);
+  return out;
+}
+const kindOf=id=>settings.kinds.find(k=>k.id===id)||{id,label:id||"기록",form:"link"};
+const kindIdx=id=>{const i=settings.kinds.findIndex(k=>k.id===id);return (i<0?0:i)%4};
+
+/* ---------- 저장소 ---------- */
 const store = FIREBASE_CONFIG ? firebaseStore() : previewStore();
 
 function previewStore(){
-  const KEY="dk-records";
-  let mem=null;
-  try{mem=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
+  const RK="dk-records", SK="dk-settings";
+  let mem=null, cfg=null;
+  try{mem=JSON.parse(localStorage.getItem(RK)||"null")}catch(e){}
+  try{cfg=JSON.parse(localStorage.getItem(SK)||"null")}catch(e){}
   if(!Array.isArray(mem)) mem=SAMPLES.slice();
-  const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(mem))}catch(e){}};
+  const put=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
   return {
     mode:"preview",
-    start(cb){records=mem;cb()},
-    async save(r){ if(r.id){mem=mem.map(x=>x.id===r.id?r:x)} else {r.id="r"+Date.now();mem.push(r)} records=mem;persist(); },
-    async remove(id){ mem=mem.filter(x=>x.id!==id);records=mem;persist(); },
+    start(cb){records=mem;settings=normSettings(cfg);cb()},
+    async save(r){ if(r.id){mem=mem.map(x=>x.id===r.id?r:x)} else {r.id="r"+Date.now();mem.push(r)} records=mem;put(RK,mem); },
+    async remove(id){ mem=mem.filter(x=>x.id!==id);records=mem;put(RK,mem); },
+    async saveSettings(s){ cfg=s;settings=normSettings(s);put(SK,s); },
     async login(){ return true },
     async logout(){},
   };
 }
 
 function firebaseStore(){
-  let db, auth, user=null;
+  let db, auth;
   const V="10.12.2", base=`https://www.gstatic.com/firebasejs/${V}/`;
   const load=src=>new Promise((ok,no)=>{const s=document.createElement("script");s.src=base+src;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
   return {
@@ -313,19 +378,21 @@ function firebaseStore(){
       try{
         await load("firebase-app-compat.js");
         await Promise.all([load("firebase-database-compat.js"),load("firebase-auth-compat.js")]);
-      }catch(e){ showNotice("기록을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요."); return; }
+      }catch(e){ showNotice("기록을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.",true); return; }
       firebase.initializeApp(FIREBASE_CONFIG);
       db=firebase.database(); auth=firebase.auth();
       db.ref("records").on("value",snap=>{
         records=Object.entries(snap.val()||{}).map(([id,d])=>({id,...d})); cb();
-      },()=>showNotice("기록을 불러오지 못했어요. Realtime Database 보안 규칙에서 읽기가 허용됐는지 확인해 주세요."));
-      auth.onAuthStateChanged(u=>{user=u; setAdmin(!!u); if(u) $("#who").innerHTML=`<b>관리 중</b> · ${esc(u.email||"")}`;});
+      },()=>showNotice("기록을 불러오지 못했어요. Realtime Database 규칙에서 읽기(.read)가 허용됐는지 확인해 주세요.",true));
+      db.ref("settings").on("value",snap=>{ settings=normSettings(snap.val()); cb(); },()=>{});
+      auth.onAuthStateChanged(u=>{ setAdmin(!!u); if(u) $("#who").innerHTML=`<b>관리 중</b> · ${esc(u.email||"")}`; });
     },
     async save(r){ const {id,...data}=r; if(id) await db.ref("records/"+id).set(data); else await db.ref("records").push(data); },
     async remove(id){ await db.ref("records/"+id).remove(); },
+    async saveSettings(s){ await db.ref("settings").set(s); },
     async login(){ await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); return true },
     async logout(){ await auth.signOut(); },
-    async seed(){ const u={}; SAMPLES.forEach(({id,...d})=>{u[db.ref("records").push().key]=d}); await db.ref("records").update(u); }
+    async seed(){ const u={}; SAMPLES.forEach(({id,...d})=>{u["records/"+db.ref("records").push().key]=d}); await db.ref().update(u); }
   };
 }
 
@@ -337,17 +404,24 @@ function why(err){
   if(code.includes("NETWORK")||code.includes("DISCONNECT")) return "인터넷 연결이 끊겨서 저장하지 못했어요. 연결을 확인하고 다시 눌러 주세요.";
   return "저장하지 못했어요. 오류: "+(err&&(err.code||err.message)||"알 수 없음");
 }
+
 /* ---------- 화면 ---------- */
-function showNotice(t){const n=$("#notice");n.textContent=t;n.hidden=!t}
+function showNotice(t,isErr){const n=$("#notice");n.textContent=t||"";n.hidden=!t;n.classList.toggle("err",!!isErr)}
 function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2200)}
 
+function renderCounts(){
+  $("#counts").innerHTML=settings.kinds.map(k=>`<div><b>${records.filter(r=>r.kind===k.id).length}</b><span>${esc(k.label)}</span></div>`).join("");
+}
 function renderFilters(){
-  const present=SUBJECTS.filter(s=>records.some(r=>r.subject===s));
-  if(state.subject&&!present.includes(state.subject)) state.subject=null;
+  const presentSub=settings.subjects.filter(s=>records.some(r=>r.subject===s));
+  records.forEach(r=>{if(r.subject&&!settings.subjects.includes(r.subject)&&!presentSub.includes(r.subject))presentSub.push(r.subject)});
+  if(state.subject&&!presentSub.includes(state.subject)) state.subject=null;
+  if(state.kind!=="all"&&!settings.kinds.some(k=>k.id===state.kind)) state.kind="all";
+  const kinds=[{id:"all",label:"전체"},...settings.kinds];
   $("#filters").innerHTML='<span class="label">종류</span>'+
-    [["all","전체"],["app","웹앱"],["note","노하우"]].map(([k,l])=>`<button class="chip" type="button" id="k-${k}" data-kind="${k}" aria-pressed="${state.kind===k}">${l}</button>`).join("")+
-    (present.length?'<span class="sep" aria-hidden="true"></span><span class="label">분야</span>'+
-    present.map(s=>`<button class="chip" type="button" id="s-${SUBJECTS.indexOf(s)}" data-subject="${s}" aria-pressed="${state.subject===s}">${s}</button>`).join(""):"");
+    kinds.map((k,i)=>`<button class="chip" type="button" id="kf-${i}" data-kind="${esc(k.id)}" aria-pressed="${state.kind===k.id}">${esc(k.label)}</button>`).join("")+
+    (presentSub.length?'<span class="sep" aria-hidden="true"></span><span class="label">분야</span>'+
+    presentSub.map((s,i)=>`<button class="chip" type="button" id="sf-${i}" data-subject="${esc(s)}" aria-pressed="${state.subject===s}">${esc(s)}</button>`).join(""):"");
 }
 function renderList(){
   const items=records.filter(r=>(state.kind==="all"||r.kind===state.kind)&&(!state.subject||r.subject===state.subject))
@@ -360,8 +434,6 @@ function renderList(){
   e.textContent=records.length?"이 조건에 맞는 기록이 아직 없어요.":(admin?"첫 기록을 추가해 보세요. 위의 '+ 새 기록'을 누르면 돼요.":"아직 올라온 기록이 없어요.");
   e.hidden=items.length>0;
   if(admin&&!records.length&&store.seed) e.insertAdjacentHTML("beforeend",' <button class="linkbtn" type="button" id="seedBtn">예시 기록 넣어 보기</button>');
-  $("#nApp").textContent=records.filter(r=>r.kind==="app").length;
-  $("#nNote").textContent=records.filter(r=>r.kind==="note").length;
 }
 function bodyHtml(t){
   const inline=s=>esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
@@ -373,23 +445,27 @@ function bodyHtml(t){
   }).join("");
 }
 function card(r){
+  const k=kindOf(r.kind), post=k.form==="post";
   const date=(r.date||"").slice(5).replace("-",".");
   const url=safeUrl(r.url);
   const tags=`<div class="tags">${[r.subject,...(r.tags||[])].filter(Boolean).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`;
   const edit=admin?`<button class="edit" type="button" data-edit="${esc(r.id)}">수정</button>`:"";
-  const top=`<div class="top"><span class="kind">${r.kind==="note"?"노하우":"웹앱"}</span><span class="date">${date}</span>${edit}</div>`;
-  if(r.kind!=="note"){
-    const link=url?`<a class="open" href="${esc(url)}" target="_blank" rel="noopener">열어 보기 →</a>`:`<span class="open none">링크 준비 중</span>`;
+  const top=`<div class="top"><span class="kind">${esc(k.label)}</span><span class="date">${date}</span>${edit}</div>`;
+  const files=(r.files||[]).filter(f=>safeUrl(f.url));
+  const filesHtml=files.length?`<div class="files"><span>첨부</span>${files.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name||"파일")}</a>`).join("")}</div>`:"";
+  let mid="", link="";
+  if(!post){
+    link=url?`<a class="open" href="${esc(url)}" target="_blank" rel="noopener">열어 보기 →</a>`:`<span class="open none">링크 준비 중</span>`;
     const meta=[r.grade&&`<span>대상 <b>${esc(r.grade)}</b></span>`,r.tool&&`<span>만든 도구 <b>${esc(r.tool)}</b></span>`].filter(Boolean).join("");
-    return `<article class="entry app">${top}<h3>${esc(r.title)}</h3>${r.desc?`<p>${esc(r.desc)}</p>`:""}
-      ${meta?`<div class="meta">${meta}</div>`:""}<div class="foot">${tags}${link}</div></article>`;
+    mid=meta?`<div class="meta">${meta}</div>`:"";
+  }else{
+    link=url?`<a class="open" href="${esc(url)}" target="_blank" rel="noopener">관련 링크 →</a>`:"";
+    mid=r.body?`<details><summary>글 전체</summary><div class="body">${bodyHtml(r.body)}</div></details>`:"";
   }
-  const link=url?`<a class="open" href="${esc(url)}" target="_blank" rel="noopener">관련 링크 →</a>`:"";
-  return `<article class="entry note">${top}<h3>${esc(r.title)}</h3>${r.desc?`<p>${esc(r.desc)}</p>`:""}
-    ${r.body?`<details><summary>글 전체</summary><div class="body">${bodyHtml(r.body)}</div></details>`:""}
-    <div class="foot">${tags}${link}</div></article>`;
+  return `<article class="entry k${kindIdx(r.kind)}">${top}<h3>${esc(r.title)}</h3>${r.desc?`<p>${esc(r.desc)}</p>`:""}
+    ${mid}${filesHtml}<div class="foot">${tags}${link}</div></article>`;
 }
-function render(){renderFilters();renderList()}
+function render(){renderCounts();renderFilters();renderList()}
 
 function setAdmin(on){
   admin=on;
@@ -398,31 +474,45 @@ function setAdmin(on){
   render();
 }
 
-/* ---------- 편집 창 ---------- */
+/* ---------- 기록 편집 창 ---------- */
 const dlg=$("#dlg"), form=$("#form");
-$("#f-subject").innerHTML=SUBJECTS.map(s=>`<option>${s}</option>`).join("");
 let editing=null;
-function kindNow(){return form.querySelector('input[name=kind]:checked').value}
+function kindNow(){const c=form.querySelector('input[name=kind]:checked');return c?c.value:settings.kinds[0].id}
 function syncKind(){
-  const note=kindNow()==="note";
-  $("#appOnly").hidden=note; $("#bodyField").hidden=!note;
-  $("#urlLabel").textContent=note?"관련 링크":"앱 주소";
-  $("#urlHelp").textContent=note?"글과 함께 볼 자료나 앱 주소가 있으면 넣어 주세요.":"비워 두면 '링크 준비 중'으로 보여요.";
+  const post=kindOf(kindNow()).form==="post";
+  $("#linkOnly").hidden=post; $("#bodyField").hidden=!post;
+  $("#urlLabel").textContent=post?"관련 링크":"주소";
+  $("#urlHelp").textContent=post?"글과 함께 볼 자료나 앱 주소가 있으면 넣어 주세요.":"비워 두면 '링크 준비 중'으로 보여요.";
 }
-form.querySelectorAll('input[name=kind]').forEach(i=>i.addEventListener("change",syncKind));
+function fileRow(f){
+  const d=document.createElement("div"); d.className="filerow";
+  d.innerHTML=`<input type="text" class="fname" placeholder="파일 이름 (예: 활동지.pdf)" value="${esc(f?.name||"")}">
+    <input type="url" class="furl" inputmode="url" placeholder="https://drive.google.com/..." value="${esc(f?.url||"")}">
+    <button type="button" class="rm" aria-label="이 첨부 빼기">×</button>`;
+  d.querySelector(".rm").onclick=()=>d.remove();
+  $("#fileRows").appendChild(d);
+}
+$("#addFileBtn").onclick=()=>{fileRow();$("#fileRows").lastElementChild.querySelector("input").focus()};
 function openEditor(r){
   editing=r||null;
   $("#dlgTitle").textContent=r?"기록 수정":"새 기록";
-  (r&&r.kind==="note"?$("#f-kind-note"):$("#f-kind-app")).checked=true;
+  const kinds=settings.kinds.slice();
+  if(r&&!kinds.some(k=>k.id===r.kind)) kinds.push(kindOf(r.kind));
+  const cur=r?.kind||(state.kind!=="all"?state.kind:kinds[0].id);
+  $("#kindSeg").innerHTML=kinds.map((k,i)=>`<label><input type="radio" name="kind" id="fk-${i}" value="${esc(k.id)}" ${k.id===cur?"checked":""}><span>${esc(k.label)}</span></label>`).join("");
+  form.querySelectorAll('input[name=kind]').forEach(i=>i.addEventListener("change",syncKind));
+  const subs=settings.subjects.slice(); if(r?.subject&&!subs.includes(r.subject)) subs.push(r.subject);
+  $("#f-subject").innerHTML=subs.map(s=>`<option>${esc(s)}</option>`).join("");
+  $("#f-subject").value=r?.subject||(state.subject||(subs.includes("만들기")?"만들기":subs[0]||""));
   $("#f-title").value=r?.title||"";
   $("#f-date").value=r?.date||new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
-  $("#f-subject").value=r?.subject||"만들기";
   $("#f-desc").value=r?.desc||"";
   $("#f-url").value=r?.url||"";
   $("#f-grade").value=r?.grade||"";
   $("#f-tool").value=r?.tool||"";
   $("#f-tags").value=(r?.tags||[]).join(", ");
   $("#f-body").value=r?.body||"";
+  $("#fileRows").innerHTML=""; (r?.files||[]).forEach(fileRow);
   $("#formMsg").hidden=true;
   const d=$("#delBtn"); d.hidden=!r; d.classList.remove("sure"); d.textContent="삭제";
   syncKind(); dlg.showModal(); $("#f-title").focus();
@@ -436,12 +526,16 @@ form.addEventListener("submit",async e=>{
   if(!title) return formError("제목을 적어 주세요."), $("#f-title").focus();
   if(!$("#f-date").value) return formError("날짜를 골라 주세요.");
   if(url&&!safeUrl(url)) return formError("주소는 https:// 로 시작해야 해요.");
+  const files=[...$("#fileRows").children].map(d=>({name:d.querySelector(".fname").value.trim(),url:d.querySelector(".furl").value.trim()})).filter(f=>f.url||f.name);
+  const bad=files.find(f=>!safeUrl(f.url));
+  if(bad) return formError(`첨부 '${bad.name||"이름 없음"}'의 링크가 비었거나 https:// 로 시작하지 않아요.`);
   const r={kind,title,date:$("#f-date").value,subject:$("#f-subject").value,desc:$("#f-desc").value.trim(),url,
-    tags:$("#f-tags").value.split(/[,，]/).map(s=>s.trim().replace(/^#/,"")).filter(Boolean)};
-  if(kind==="app"){r.grade=$("#f-grade").value.trim();r.tool=$("#f-tool").value.trim()} else {r.body=$("#f-body").value}
-  if(editing) r.id=editing.id;
+    tags:$("#f-tags").value.split(/[,，]/).map(s=>s.trim().replace(/^#/,"")).filter(Boolean),
+    files:files.map(f=>({name:f.name||"파일",url:f.url}))};
+  if(kindOf(kind).form==="post"){r.body=$("#f-body").value} else {r.grade=$("#f-grade").value.trim();r.tool=$("#f-tool").value.trim()}
+  const wasEdit=!!editing; if(editing) r.id=editing.id;
   const btn=$("#saveBtn"); btn.disabled=true; btn.textContent="저장 중…";
-  try{ await store.save(r); closeEditor(); render(); toast(editing?"수정했어요":"추가했어요"); }
+  try{ await store.save(r); closeEditor(); render(); toast(wasEdit?"수정했어요":"추가했어요"); }
   catch(err){ formError(why(err)); }
   finally{ btn.disabled=false; btn.textContent="저장"; }
 });
@@ -451,6 +545,54 @@ $("#delBtn").onclick=async()=>{
   try{ await store.remove(editing.id); closeEditor(); render(); toast("삭제했어요"); }
   catch(e){ formError(why(e)); }
 };
+
+/* ---------- 분야·종류 관리 창 ---------- */
+const cfg=$("#cfg");
+function cfgError(t){const m=$("#cfgMsg");m.textContent=t||"";m.hidden=!t}
+function renderCfg(){
+  $("#kindPills").innerHTML=settings.kinds.map((k,i)=>{
+    const n=records.filter(r=>r.kind===k.id).length;
+    return `<span class="pill k${i%4}"><span class="dot"></span>${esc(k.label)} <small>${k.form==="post"?"글":"링크"} · ${n}개</small><button type="button" data-rmkind="${esc(k.id)}" aria-label="${esc(k.label)} 지우기">×</button></span>`;
+  }).join("");
+  $("#subjectPills").innerHTML=settings.subjects.map(s=>{
+    const n=records.filter(r=>r.subject===s).length;
+    return `<span class="pill">${esc(s)} <small>${n}개</small><button type="button" data-rmsub="${esc(s)}" aria-label="${esc(s)} 지우기">×</button></span>`;
+  }).join("")||'<span class="hint">아직 분야가 없어요.</span>';
+}
+async function commitSettings(next,okMsg){
+  try{ await store.saveSettings(next); settings=normSettings(next); renderCfg(); render(); cfgError(""); if(okMsg) toast(okMsg); return true }
+  catch(err){ cfgError(why(err)); return false }
+}
+$("#cfgBtn").onclick=()=>{cfgError("");renderCfg();cfg.showModal();$("#newKind").focus()};
+$("#cfgClose").onclick=$("#cfgDone").onclick=()=>cfg.close();
+$("#addKindBtn").onclick=async()=>{
+  const label=$("#newKind").value.trim(); if(!label) return cfgError("새 종류 이름을 적어 주세요.");
+  if(settings.kinds.some(k=>k.label===label)) return cfgError(`'${label}'은(는) 이미 있어요.`);
+  const next=clone(settings); next.kinds.push({id:"k"+Date.now().toString(36),label,form:$("#newKindForm").value});
+  if(await commitSettings(next,`'${label}' 종류를 추가했어요`)) $("#newKind").value="";
+};
+$("#addSubjectBtn").onclick=async()=>{
+  const s=$("#newSubject").value.trim(); if(!s) return cfgError("새 분야 이름을 적어 주세요.");
+  if(settings.subjects.includes(s)) return cfgError(`'${s}'은(는) 이미 있어요.`);
+  const next=clone(settings); next.subjects.push(s);
+  if(await commitSettings(next,`'${s}' 분야를 추가했어요`)) $("#newSubject").value="";
+};
+$("#newKind").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("#addKindBtn").click()}});
+$("#newSubject").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("#addSubjectBtn").click()}});
+cfg.addEventListener("click",async e=>{
+  const k=e.target.closest("[data-rmkind]"), s=e.target.closest("[data-rmsub]");
+  if(k){
+    const id=k.dataset.rmkind, lab=kindOf(id).label, n=records.filter(r=>r.kind===id).length;
+    if(n) return cfgError(`'${lab}' 기록이 ${n}개 있어서 지울 수 없어요. 그 기록들의 종류를 먼저 바꿔 주세요.`);
+    if(settings.kinds.length<=1) return cfgError("종류는 하나 이상 있어야 해요.");
+    const next=clone(settings); next.kinds=next.kinds.filter(x=>x.id!==id); commitSettings(next,`'${lab}' 종류를 지웠어요`);
+  }
+  if(s){
+    const name=s.dataset.rmsub, n=records.filter(r=>r.subject===name).length;
+    if(n) return cfgError(`'${name}' 분야 기록이 ${n}개 있어서 지울 수 없어요. 그 기록들의 분야를 먼저 바꿔 주세요.`);
+    const next=clone(settings); next.subjects=next.subjects.filter(x=>x!==name); commitSettings(next,`'${name}' 분야를 지웠어요`);
+  }
+});
 
 /* ---------- 이벤트 ---------- */
 $("#filters").addEventListener("click",e=>{
@@ -464,7 +606,7 @@ $("#list").addEventListener("click",e=>{
   const b=e.target.closest("[data-edit]"); if(b) openEditor(records.find(r=>r.id===b.dataset.edit));
 });
 document.addEventListener("click",async e=>{
-  if(e.target.id==="seedBtn"){ try{await store.seed();toast("예시 기록을 넣었어요");showNotice("")}catch(err){showNotice(why(err))} }
+  if(e.target.id==="seedBtn"){ try{await store.seed();toast("예시 기록을 넣었어요");showNotice("")}catch(err){showNotice(why(err),true)} }
 });
 $("#addBtn").onclick=()=>openEditor(null);
 async function exitAdmin(){ await store.logout(); setAdmin(false); }
