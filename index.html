@@ -4,37 +4,39 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="교실에서 쓰려고 만든 웹앱과 수업 노하우를 모아 두는 기록장">
-<style>[hidden]{display:none!important}body{margin:0}</style>
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
 <title>동카이브</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gothic+A1:wght@400;600;800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: 한 줄 시간축(월별) 위에 웹앱 카드와 노하우 노트가 섞여 쌓이는 기록장. 위쪽은 이름표, 아래는 필터. */
+/* Layout: 한 줄 시간축(월별) 위에 웹앱 카드와 노하우 노트가 섞여 쌓이는 기록장. 관리 모드에서는 같은 화면 위에서 바로 추가·수정. */
 :root{
   --paper:#f3f6f8; --card:#ffffff; --ink:#18232e; --muted:#5b6b78; --line:#d5dee5;
   --mark:#ffd84a; --app:#1f6f8b; --app-soft:#dcedf3; --note:#7a4fb0; --note-soft:#ece4f6;
+  --danger:#b23a3a; --scrim:rgba(16,24,32,.45);
   --display:"Do Hyeon","Gothic A1",system-ui,sans-serif;
   --body:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --paper:#11181e; --card:#18222a; --ink:#e6edf2; --muted:#9aaab6; --line:#2a3842;
-  --mark:#e3bd2a; --app:#6cc0dc; --app-soft:#183441; --note:#c3a2ef; --note-soft:#2b2240; color-scheme:dark}}
+  --mark:#e3bd2a; --app:#6cc0dc; --app-soft:#183441; --note:#c3a2ef; --note-soft:#2b2240;
+  --danger:#ec8a8a; --scrim:rgba(0,0,0,.6); color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#11181e; --card:#18222a; --ink:#e6edf2; --muted:#9aaab6; --line:#2a3842;
-  --mark:#e3bd2a; --app:#6cc0dc; --app-soft:#183441; --note:#c3a2ef; --note-soft:#2b2240; color-scheme:dark}
+  --mark:#e3bd2a; --app:#6cc0dc; --app-soft:#183441; --note:#c3a2ef; --note-soft:#2b2240;
+  --danger:#ec8a8a; --scrim:rgba(0,0,0,.6); color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .wrap{max-width:860px;margin:0 auto;padding-block:28px 64px}
 
-.demo{font-size:13px;color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:8px 12px;margin-bottom:28px}
+.notice{font-size:13px;color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:8px 12px;margin-bottom:28px}
 
 header{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;border-bottom:3px solid var(--ink);padding-bottom:20px}
 header>div{min-width:0}
-.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted)}
 h1{font-family:var(--display);font-weight:400;font-size:clamp(48px,11vw,84px);line-height:1;margin:6px 0 10px;letter-spacing:-.01em}
 h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92%,transparent 92%)}
 .intro{margin:0;max-width:34em;color:var(--muted);text-wrap:pretty}
@@ -43,12 +45,24 @@ h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92
 .counts b{display:block;font-family:var(--display);font-weight:400;font-size:40px;line-height:1}
 .counts span{font-size:12px;color:var(--muted)}
 
+/* 관리 막대 */
+.adminbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:18px;padding:10px 14px;border-radius:10px;background:var(--ink);color:var(--paper)}
+.adminbar .who{font-size:13px}
+.adminbar .who b{font-weight:800}
+.adminbar .acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:600 14px var(--body);border-radius:8px;padding:7px 14px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--mark);border-color:var(--mark);color:#18232e}
+.btn.ghost{background:transparent;color:inherit;border-color:currentColor;opacity:.85}
+.btn.danger{color:var(--danger);border-color:var(--danger);background:transparent}
+.btn.danger.sure{background:var(--danger);color:var(--card)}
+.btn:focus-visible,.chip:focus-visible,.open:focus-visible,summary:focus-visible,.edit:focus-visible,.linkbtn:focus-visible{outline:2px solid var(--app);outline-offset:2px}
+
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:22px 0 8px}
 .filters .label{font-size:12px;color:var(--muted);margin-right:4px;letter-spacing:.04em}
 .chip{font:600 13px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
 .chip:hover{border-color:var(--ink)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.chip:focus-visible,.open:focus-visible,summary:focus-visible{outline:2px solid var(--app);outline-offset:2px}
 .sep{width:1px;height:20px;background:var(--line);margin:0 6px}
 
 .month{display:grid;grid-template-columns:96px 1fr;gap:20px;margin-top:34px}
@@ -62,7 +76,9 @@ h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92
 .kind{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:2px 8px;border-radius:4px;background:var(--app-soft);color:var(--app)}
 .note .kind{background:var(--note-soft);color:var(--note)}
 .date{font-family:var(--mono);color:var(--muted)}
-.entry h3{font-size:18px;font-weight:800;margin:8px 0 4px;text-wrap:balance}
+.edit{margin-left:auto;font:600 12px var(--body);color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:2px 10px;cursor:pointer}
+.edit:hover{color:var(--ink);border-color:var(--ink)}
+.entry h3{font-size:18px;font-weight:800;margin:8px 0 4px;text-wrap:balance;overflow-wrap:anywhere}
 .entry p{margin:0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13px}
 .meta span{color:var(--muted)}
@@ -73,18 +89,50 @@ h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92
 .tag::before{content:"#"}
 .open{font:600 13px var(--body);color:var(--app);text-decoration:none;border:1px solid currentColor;border-radius:6px;padding:4px 10px;white-space:nowrap}
 .open:hover{background:var(--app-soft)}
+.open.none{color:var(--muted);border-style:dashed}
+.note .open{color:var(--note)}
+.note .open:hover{background:var(--note-soft)}
 
 details{margin-top:10px}
 summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--note);list-style:none}
 summary::-webkit-details-marker{display:none}
 summary::after{content:" 펼치기"}
 details[open] summary::after{content:" 접기"}
-.body{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);max-width:62ch}
+.body{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);max-width:62ch;overflow-wrap:anywhere}
 .body p{color:var(--ink);margin:0 0 8px}
 .body ol,.body ul{margin:0 0 8px;padding-left:20px}
+.body a{color:var(--note)}
 
 .empty{color:var(--muted);margin-top:30px}
-footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
+.linkbtn{font:inherit;color:var(--muted);background:none;border:none;padding:0;text-decoration:underline;cursor:pointer}
+
+/* 편집 창 */
+dialog{border:none;border-radius:14px;padding:0;width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 32px);background:var(--card);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:var(--scrim)}
+.dlg{display:grid;grid-template-rows:auto 1fr auto;max-height:calc(100dvh - 32px)}
+.dlg-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dlg-head h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0}
+.x{font-size:22px;line-height:1;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 8px}
+.dlg-body{overflow:auto;padding:18px 20px;display:grid;gap:14px}
+.dlg-foot{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:14px 20px;border-top:1px solid var(--line)}
+.dlg-foot .right{display:flex;gap:8px;margin-left:auto}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:grid;gap:5px;min-width:0}
+.field>span{font-size:13px;font-weight:600}
+.field small{font-size:12px;color:var(--muted)}
+input[type=text],input[type=url],input[type=date],select,textarea{font:15px var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+textarea{min-height:170px;resize:vertical;line-height:1.6}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--app);outline-offset:0;border-color:transparent}
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;width:max-content}
+.seg label{cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;padding:7px 18px;font-weight:600;font-size:14px}
+.seg input:checked+span{background:var(--ink);color:var(--paper)}
+.seg input:focus-visible+span{outline:2px solid var(--app);outline-offset:-2px}
+.msg{font-size:13px;color:var(--danger)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;font-size:14px;z-index:20;max-width:calc(100vw - 32px)}
 
 @media (max-width:600px){
   header{grid-template-columns:1fr}
@@ -93,6 +141,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-si
   .month h2{position:static}
   .entries{padding-left:16px}
   .entry::before{left:-24px}
+  .row{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:no-preference){.entry{transition:border-color .15s}.entry:hover{border-color:var(--muted)}}
 </style>
@@ -100,7 +149,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-si
 <body>
 
 <div class="wrap">
-  <div class="demo">예시 페이지입니다. 앱 이름은 선생님이 만든 것들을 넣었고, 링크와 노하우 글은 자리를 채운 견본이에요.</div>
+  <div class="notice" id="notice" hidden></div>
 
   <header>
     <div>
@@ -113,128 +162,315 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-si
     </div>
   </header>
 
+  <div class="adminbar" id="adminbar" hidden>
+    <div class="who" id="who"><b>관리 중</b></div>
+    <div class="acts">
+      <button class="btn primary" id="addBtn" type="button">+ 새 기록</button>
+      <button class="btn ghost" id="exitBtn" type="button">관리 끝내기</button>
+    </div>
+  </div>
+
   <div class="filters" id="filters" role="group" aria-label="보기 필터"></div>
   <main id="list"></main>
   <p class="empty" id="empty" hidden>이 조건에 맞는 기록이 아직 없어요.</p>
 
-  <footer>새 기록은 이 파일 맨 아래의 기록 목록에 한 줄씩 추가하면 됩니다. 날짜 순서는 자동으로 정리돼요.</footer>
+  <footer>
+    <span>동카이브</span>
+    <button class="linkbtn" id="adminBtn" type="button">관리</button>
+  </footer>
 </div>
 
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form class="dlg" id="form" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlgTitle">새 기록</h2>
+      <button class="x" type="button" id="closeBtn" aria-label="닫기">×</button>
+    </div>
+    <div class="dlg-body">
+      <div class="field">
+        <span>종류</span>
+        <div class="seg" role="radiogroup" aria-label="종류">
+          <label><input type="radio" name="kind" id="f-kind-app" value="app" checked><span>웹앱</span></label>
+          <label><input type="radio" name="kind" id="f-kind-note" value="note"><span>노하우</span></label>
+        </div>
+      </div>
+      <label class="field"><span>제목</span><input type="text" id="f-title" required placeholder="예: 알파벳 마을"></label>
+      <div class="row">
+        <label class="field"><span>날짜</span><input type="date" id="f-date" required></label>
+        <label class="field"><span>분야</span>
+          <select id="f-subject"></select>
+        </label>
+      </div>
+      <label class="field"><span>한 줄 소개</span><input type="text" id="f-desc" placeholder="카드에 보이는 짧은 설명"></label>
+      <label class="field"><span id="urlLabel">앱 주소</span>
+        <input type="url" id="f-url" inputmode="url" placeholder="https://wooni-teacher.github.io/...">
+        <small id="urlHelp">비워 두면 '링크 준비 중'으로 보여요.</small>
+      </label>
+      <div class="row" id="appOnly">
+        <label class="field"><span>대상</span><input type="text" id="f-grade" placeholder="예: 5학년"></label>
+        <label class="field"><span>만든 도구</span><input type="text" id="f-tool" placeholder="예: Firebase" list="tools"></label>
+      </div>
+      <datalist id="tools"><option value="HTML"><option value="Firebase"><option value="Apps Script"><option value="React"><option value="Three.js"></datalist>
+      <label class="field"><span>태그</span><input type="text" id="f-tags" placeholder="쉼표로 구분: 복습, 멀티플레이"></label>
+      <label class="field" id="bodyField"><span>본문</span>
+        <textarea id="f-body" placeholder="빈 줄로 문단을 나눠요.&#10;- 로 시작하면 점 목록&#10;1. 로 시작하면 번호 목록&#10;**굵게** 쓰면 굵은 글씨"></textarea>
+        <small>주소(https://…)를 그대로 쓰면 자동으로 링크가 돼요.</small>
+      </label>
+      <p class="msg" id="formMsg" hidden></p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn danger" type="button" id="delBtn" hidden>삭제</button>
+      <div class="right">
+        <button class="btn" type="button" id="cancelBtn">취소</button>
+        <button class="btn primary" type="submit" id="saveBtn">저장</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
 <script>
-/* ===== 기록 목록: 여기에만 추가하세요 =====
-   kind: "app"(웹앱) 또는 "note"(노하우)
-   subject: 국어 · 영어 · 사회 · 실과 · 학급운영 · 행사 · 만들기 */
-const RECORDS = [
-  {kind:"app", date:"2026-11-06", subject:"실과", title:"실과 AI 튜터봇",
-   desc:"6학년 실과 시간에 묻고 답하는 AI 튜터 챗봇.",
-   grade:"6학년", tool:"Apps Script", tags:["AI","챗봇","정보연수"], url:"#"},
-  {kind:"app", date:"2026-11-04", subject:"실과", title:"과목별 단어봇",
-   desc:"동료 선생님 요청으로 만든 6학년 과목별 단어 검색 도구.",
-   grade:"6학년", tool:"Apps Script", tags:["검색","동료와 함께"], url:"#"},
-  {kind:"note", date:"2026-11-03", subject:"만들기", title:"Apps Script로 챗봇을 만들 때 먼저 정해 둔 세 가지",
-   desc:"수업용 챗봇은 기능보다 '무엇을 안 할지'를 먼저 정해야 했다.",
-   tags:["AI","챗봇"],
-   body:`<p>(예시 글) AI 튜터봇을 만들며 처음부터 정해 두니 편했던 것들입니다.</p>
-   <ol><li><b>답을 바로 주지 않기</b>: 힌트 → 질문 → 정답 순서로.</li>
-   <li><b>범위 정하기</b>: 단원 밖 질문은 정중하게 돌려보내기.</li>
-   <li><b>기록 남기기</b>: 학생이 자주 묻는 질문을 시트에 쌓아 다음 수업에 반영.</li></ol>`},
-  {kind:"app", date:"2026-11-01", subject:"행사", title:"안중근 뮤지컬 배역 뽑기",
-   desc:"학예회 뮤지컬 〈안중근: 누가 죄인인가〉 32개 배역을 명단 입력 후 랜덤으로 배정.",
-   grade:"5·6학년", tool:"HTML", tags:["학예회","뽑기"], url:"#"},
-  {kind:"app", date:"2026-10-28", subject:"학급운영", title:"우리 반 학교 마을",
-   desc:"학생들이 함께 도서관·놀이터·텃밭·미술 공방을 짓는 협동 마을 게임.",
-   grade:"5학년", tool:"Firebase", tags:["협동","멀티플레이"], url:"#"},
-  {kind:"app", date:"2026-10-04", subject:"사회", title:"사회 학습지 웹앱",
-   desc:"한글 파일로 나눠 주던 사회 학습지를 태블릿에서 바로 풀 수 있게 옮긴 것.",
-   grade:"5학년", tool:"HTML", tags:["학습지","HWP 옮기기"], url:"#"},
-  {kind:"note", date:"2026-10-02", subject:"만들기", title:"한글 학습지를 웹앱으로 옮길 때 체크리스트",
-   desc:"그대로 옮기면 종이보다 불편해진다. 바꿔야 할 것만 골라서.",
-   tags:["학습지","HWP 옮기기"],
-   body:`<p>(예시 글) 옮기기 전에 확인하는 것들:</p>
-   <ul><li>빈칸은 입력칸으로, 선 긋기는 선택지로 바꾸기</li>
-   <li>한 화면에 한 문항, 태블릿 세로 화면 기준</li>
-   <li>채점이 필요한 문항과 생각을 쓰는 문항 구분하기</li>
-   <li>제출하면 선생님 화면에 바로 모이게</li></ul>`},
-  {kind:"app", date:"2026-09-22", subject:"영어", title:"알파벳 마을",
-   desc:"5학년 2학기 Lesson 7~12 단어와 핵심 표현을 복습하는 3D 마을 게임. 선생님은 촌장님.",
-   grade:"5학년", tool:"Firebase", tags:["복습","멀티플레이","3D"], url:"#"},
-  {kind:"note", date:"2026-09-18", subject:"만들기", title:"태블릿 15대로 실시간 게임 돌려 본 기록",
-   desc:"안드로이드 태블릿에서 멀티플레이 게임을 처음 돌린 날 생긴 일과 해결 방법.",
-   tags:["Firebase","태블릿","멀티플레이"],
-   body:`<p>(예시 글) 15명이 한꺼번에 접속했을 때 미리 알았으면 좋았을 것:</p>
-   <ul><li>첫 접속은 와이파이가 몰리니 입장 시간을 모둠별로 나누기</li>
-   <li>3D 화면은 저사양 태블릿용 '가벼운 모드'를 따로 두기</li>
-   <li>새로고침해도 이어지도록 학생 번호로 자리 기억하기</li></ul>`},
-  {kind:"app", date:"2026-09-16", subject:"국어", title:"문장 성분 사목놀이",
-   desc:"주어·목적어·서술어를 찾아 칸을 차지하는 1:1 대전 게임.",
-   grade:"5학년", tool:"Firebase", tags:["문장 성분","대전"], url:"#"},
-  {kind:"app", date:"2026-09-12", subject:"국어", title:"뒹굴뒹굴 레이싱",
-   desc:"문장 호응이 맞는 길을 골라 달리는 레이싱 게임.",
-   grade:"5학년", tool:"Three.js", tags:["문장 호응","3D"], url:"#"},
-  {kind:"note", date:"2026-09-08", subject:"학급운영", title:"게임형 복습, 수업 어디에 넣을까",
-   desc:"수업 끝 10분보다 단원 중간에 넣었을 때 반응이 좋았다.",
-   tags:["복습","수업설계"],
-   body:`<p>(예시 글) 세 가지 위치에서 써 본 결과:</p>
-   <ul><li><b>수업 시작</b>: 지난 시간 복습용으로 5분이면 충분</li>
-   <li><b>단원 중간</b>: 헷갈리는 개념을 찾기 좋음</li>
-   <li><b>수업 끝</b>: 시간이 밀리면 가장 먼저 잘림</li></ul>`},
-  {kind:"app", date:"2026-08-25", subject:"학급운영", title:"우리 반 탐험대",
-   desc:"5학년 학급 운영을 위한 탐험대 테마 관리 앱.",
-   grade:"5학년", tool:"React", tags:["학급 경영"], url:"#"},
-  {kind:"app", date:"2026-08-10", subject:"영어", title:"Dokdo",
-   desc:"섬을 돌아다니며 영어 단어를 익히는 오픈월드 어드벤처.",
-   grade:"5·6학년", tool:"Three.js", tags:["단어","3D","RPG"], url:"#"}
-];
+/* =========================================================
+   Firebase 연결: 콘솔의 '웹 앱 추가'에서 받은 설정을 붙여 넣으면
+   모든 방문자가 같은 기록을 보게 됩니다.
+   비워 두면(null) 미리보기 모드로, 이 브라우저에만 저장돼요.
+   ========================================================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBU5lsiMH0zlFoajUaOhGA96Qpo9lRf3lo",
+  authDomain: "dongkive.firebaseapp.com",
+  databaseURL: "https://dongkive-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dongkive",
+  storageBucket: "dongkive.firebasestorage.app",
+  messagingSenderId: "816023735029",
+  appId: "1:816023735029:web:5a2d0afbf82cd99c1053bc"
+};
+/* 예시:
+const FIREBASE_CONFIG = {
+  apiKey: "...", authDomain: "dongkive.firebaseapp.com",
+  databaseURL: "https://dongkive-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dongkive", storageBucket: "...", messagingSenderId: "...", appId: "..."
+};
+   databaseURL 줄이 꼭 있어야 해요. */
+/*
+*/
 
-const KINDS=[["all","전체"],["app","웹앱"],["note","노하우"]];
-const SUBJECTS=["국어","영어","사회","실과","학급운영","행사","만들기"];
-let state={kind:"all",subject:null};
-try{const s=JSON.parse(localStorage.getItem("dk-filter")||"null");if(s)state=s}catch(e){}
+const SUBJECTS=["국어","영어","수학","사회","과학","실과","체육","학급운영","행사","만들기","기타"];
 
+const SAMPLES = [
+  {kind:"app", date:"2026-11-06", subject:"실과", title:"실과 AI 튜터봇", desc:"6학년 실과 시간에 묻고 답하는 AI 튜터 챗봇.", grade:"6학년", tool:"Apps Script", tags:["AI","챗봇"], url:""},
+  {kind:"app", date:"2026-11-04", subject:"실과", title:"과목별 단어봇", desc:"동료 선생님 요청으로 만든 6학년 과목별 단어 검색 도구.", grade:"6학년", tool:"Apps Script", tags:["검색","동료와 함께"], url:""},
+  {kind:"note", date:"2026-11-03", subject:"만들기", title:"Apps Script로 챗봇을 만들 때 먼저 정해 둔 세 가지", desc:"수업용 챗봇은 기능보다 '무엇을 안 할지'를 먼저 정해야 했다.", tags:["AI","챗봇"], url:"",
+   body:"(예시 글) 튜터봇을 만들며 처음부터 정해 두니 편했던 것들입니다.\n\n1. **답을 바로 주지 않기**: 힌트 → 질문 → 정답 순서로.\n2. **범위 정하기**: 단원 밖 질문은 정중하게 돌려보내기.\n3. **기록 남기기**: 학생이 자주 묻는 질문을 시트에 쌓아 다음 수업에 반영."},
+  {kind:"app", date:"2026-11-01", subject:"행사", title:"안중근 뮤지컬 배역 뽑기", desc:"학예회 뮤지컬 〈안중근: 누가 죄인인가〉 32개 배역을 명단 입력 후 랜덤으로 배정.", grade:"5·6학년", tool:"HTML", tags:["학예회","뽑기"], url:""},
+  {kind:"app", date:"2026-10-28", subject:"학급운영", title:"우리 반 학교 마을", desc:"학생들이 함께 도서관·놀이터·텃밭·미술 공방을 짓는 협동 마을 게임.", grade:"5학년", tool:"Firebase", tags:["협동","멀티플레이"], url:""},
+  {kind:"app", date:"2026-10-04", subject:"사회", title:"사회 학습지 웹앱", desc:"한글 파일로 나눠 주던 사회 학습지를 태블릿에서 바로 풀 수 있게 옮긴 것.", grade:"5학년", tool:"HTML", tags:["학습지","HWP 옮기기"], url:""},
+  {kind:"note", date:"2026-10-02", subject:"만들기", title:"한글 학습지를 웹앱으로 옮길 때 체크리스트", desc:"그대로 옮기면 종이보다 불편해진다. 바꿔야 할 것만 골라서.", tags:["학습지","HWP 옮기기"], url:"",
+   body:"(예시 글) 옮기기 전에 확인하는 것들:\n\n- 빈칸은 입력칸으로, 선 긋기는 선택지로 바꾸기\n- 한 화면에 한 문항, 태블릿 세로 화면 기준\n- 채점이 필요한 문항과 생각을 쓰는 문항 구분하기\n- 제출하면 선생님 화면에 바로 모이게"},
+  {kind:"app", date:"2026-09-22", subject:"영어", title:"알파벳 마을", desc:"5학년 2학기 Lesson 7~12 단어와 핵심 표현을 복습하는 3D 마을 게임. 선생님은 촌장님.", grade:"5학년", tool:"Firebase", tags:["복습","멀티플레이","3D"], url:""},
+  {kind:"note", date:"2026-09-18", subject:"만들기", title:"태블릿 15대로 실시간 게임 돌려 본 기록", desc:"안드로이드 태블릿에서 멀티플레이 게임을 처음 돌린 날 생긴 일과 해결 방법.", tags:["Firebase","태블릿","멀티플레이"], url:"",
+   body:"(예시 글) 15명이 한꺼번에 접속했을 때 미리 알았으면 좋았을 것:\n\n- 첫 접속은 와이파이가 몰리니 입장 시간을 모둠별로 나누기\n- 3D 화면은 저사양 태블릿용 '가벼운 모드'를 따로 두기\n- 새로고침해도 이어지도록 학생 번호로 자리 기억하기"},
+  {kind:"app", date:"2026-09-16", subject:"국어", title:"문장 성분 사목놀이", desc:"주어·목적어·서술어를 찾아 칸을 차지하는 1:1 대전 게임.", grade:"5학년", tool:"Firebase", tags:["문장 성분","대전"], url:""},
+  {kind:"app", date:"2026-09-12", subject:"국어", title:"뒹굴뒹굴 레이싱", desc:"문장 호응이 맞는 길을 골라 달리는 레이싱 게임.", grade:"5학년", tool:"Three.js", tags:["문장 호응","3D"], url:""},
+  {kind:"note", date:"2026-09-08", subject:"학급운영", title:"게임형 복습, 수업 어디에 넣을까", desc:"수업 끝 10분보다 단원 중간에 넣었을 때 반응이 좋았다.", tags:["복습","수업설계"], url:"",
+   body:"(예시 글) 세 가지 위치에서 써 본 결과:\n\n- **수업 시작**: 지난 시간 복습용으로 5분이면 충분\n- **단원 중간**: 헷갈리는 개념을 찾기 좋음\n- **수업 끝**: 시간이 밀리면 가장 먼저 잘림"},
+  {kind:"app", date:"2026-08-25", subject:"학급운영", title:"우리 반 탐험대", desc:"5학년 학급 운영을 위한 탐험대 테마 관리 앱.", grade:"5학년", tool:"React", tags:["학급 경영"], url:""},
+  {kind:"app", date:"2026-08-10", subject:"영어", title:"Dokdo", desc:"섬을 돌아다니며 영어 단어를 익히는 오픈월드 어드벤처.", grade:"5·6학년", tool:"Three.js", tags:["단어","3D","RPG"], url:""}
+].map((r,i)=>({id:"s"+i,...r}));
+
+/* ---------- 저장소 ---------- */
 const $=s=>document.querySelector(s);
-const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc=t=>String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"";
+let records=[], admin=false, state={kind:"all",subject:null};
+try{const s=JSON.parse(localStorage.getItem("dk-filter")||"null");if(s&&s.kind)state=s}catch(e){}
+
+const store = FIREBASE_CONFIG ? firebaseStore() : previewStore();
+
+function previewStore(){
+  const KEY="dk-records";
+  let mem=null;
+  try{mem=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
+  if(!Array.isArray(mem)) mem=SAMPLES.slice();
+  const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(mem))}catch(e){}};
+  return {
+    mode:"preview",
+    start(cb){records=mem;cb()},
+    async save(r){ if(r.id){mem=mem.map(x=>x.id===r.id?r:x)} else {r.id="r"+Date.now();mem.push(r)} records=mem;persist(); },
+    async remove(id){ mem=mem.filter(x=>x.id!==id);records=mem;persist(); },
+    async login(){ return true },
+    async logout(){},
+  };
+}
+
+function firebaseStore(){
+  let db, auth, user=null;
+  const V="10.12.2", base=`https://www.gstatic.com/firebasejs/${V}/`;
+  const load=src=>new Promise((ok,no)=>{const s=document.createElement("script");s.src=base+src;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+  return {
+    mode:"firebase",
+    async start(cb){
+      try{
+        await load("firebase-app-compat.js");
+        await Promise.all([load("firebase-database-compat.js"),load("firebase-auth-compat.js")]);
+      }catch(e){ showNotice("기록을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요."); return; }
+      firebase.initializeApp(FIREBASE_CONFIG);
+      db=firebase.database(); auth=firebase.auth();
+      db.ref("records").on("value",snap=>{
+        records=Object.entries(snap.val()||{}).map(([id,d])=>({id,...d})); cb();
+      },()=>showNotice("기록을 불러오지 못했어요. Realtime Database 보안 규칙에서 읽기가 허용됐는지 확인해 주세요."));
+      auth.onAuthStateChanged(u=>{user=u; setAdmin(!!u); if(u) $("#who").innerHTML=`<b>관리 중</b> · ${esc(u.email||"")}`;});
+    },
+    async save(r){ const {id,...data}=r; if(id) await db.ref("records/"+id).set(data); else await db.ref("records").push(data); },
+    async remove(id){ await db.ref("records/"+id).remove(); },
+    async login(){ await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); return true },
+    async logout(){ await auth.signOut(); },
+    async seed(){ const u={}; SAMPLES.forEach(({id,...d})=>{u[db.ref("records").push().key]=d}); await db.ref("records").update(u); }
+  };
+}
+
+/* ---------- 화면 ---------- */
+function showNotice(t){const n=$("#notice");n.textContent=t;n.hidden=!t}
+function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2200)}
 
 function renderFilters(){
-  const f=$("#filters");
-  f.innerHTML='<span class="label">종류</span>'+
-    KINDS.map(([k,l])=>`<button class="chip" id="k-${k}" data-kind="${k}" aria-pressed="${state.kind===k}">${l}</button>`).join("")+
-    '<span class="sep" aria-hidden="true"></span><span class="label">분야</span>'+
-    SUBJECTS.map((s,i)=>`<button class="chip" id="s-${i}" data-subject="${s}" aria-pressed="${state.subject===s}">${s}</button>`).join("");
+  const present=SUBJECTS.filter(s=>records.some(r=>r.subject===s));
+  if(state.subject&&!present.includes(state.subject)) state.subject=null;
+  $("#filters").innerHTML='<span class="label">종류</span>'+
+    [["all","전체"],["app","웹앱"],["note","노하우"]].map(([k,l])=>`<button class="chip" type="button" id="k-${k}" data-kind="${k}" aria-pressed="${state.kind===k}">${l}</button>`).join("")+
+    (present.length?'<span class="sep" aria-hidden="true"></span><span class="label">분야</span>'+
+    present.map(s=>`<button class="chip" type="button" id="s-${SUBJECTS.indexOf(s)}" data-subject="${s}" aria-pressed="${state.subject===s}">${s}</button>`).join(""):"");
 }
 function renderList(){
-  const items=RECORDS.filter(r=>(state.kind==="all"||r.kind===state.kind)&&(!state.subject||r.subject===state.subject))
-    .sort((a,b)=>b.date.localeCompare(a.date));
+  const items=records.filter(r=>(state.kind==="all"||r.kind===state.kind)&&(!state.subject||r.subject===state.subject))
+    .sort((a,b)=>(b.date||"").localeCompare(a.date||""));
   const groups={};
-  items.forEach(r=>{const m=r.date.slice(0,7).replace("-",".");(groups[m]=groups[m]||[]).push(r)});
+  items.forEach(r=>{const m=(r.date||"").slice(0,7).replace("-",".")||"날짜 없음";(groups[m]=groups[m]||[]).push(r)});
   $("#list").innerHTML=Object.entries(groups).map(([m,rs])=>`
     <section class="month"><h2>${m}</h2><div class="entries">${rs.map(card).join("")}</div></section>`).join("");
-  $("#empty").hidden=items.length>0;
+  const e=$("#empty");
+  e.textContent=records.length?"이 조건에 맞는 기록이 아직 없어요.":(admin?"첫 기록을 추가해 보세요. 위의 '+ 새 기록'을 누르면 돼요.":"아직 올라온 기록이 없어요.");
+  e.hidden=items.length>0;
+  if(admin&&!records.length&&store.seed) e.insertAdjacentHTML("beforeend",' <button class="linkbtn" type="button" id="seedBtn">예시 기록 넣어 보기</button>');
+  $("#nApp").textContent=records.filter(r=>r.kind==="app").length;
+  $("#nNote").textContent=records.filter(r=>r.kind==="note").length;
+}
+function bodyHtml(t){
+  const inline=s=>esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+  return String(t||"").trim().split(/\n\s*\n/).map(block=>{
+    const lines=block.split("\n").filter(l=>l.trim());
+    if(lines.length&&lines.every(l=>/^\s*[-•]\s+/.test(l))) return "<ul>"+lines.map(l=>"<li>"+inline(l.replace(/^\s*[-•]\s+/,""))+"</li>").join("")+"</ul>";
+    if(lines.length&&lines.every(l=>/^\s*\d+[.)]\s+/.test(l))) return "<ol>"+lines.map(l=>"<li>"+inline(l.replace(/^\s*\d+[.)]\s+/,""))+"</li>").join("")+"</ol>";
+    return "<p>"+lines.map(inline).join("<br>")+"</p>";
+  }).join("");
 }
 function card(r){
-  const date=r.date.slice(5).replace("-",".");
-  const tags=`<div class="tags">${[r.subject,...r.tags].map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`;
-  if(r.kind==="app") return `<article class="entry app">
-    <div class="top"><span class="kind">웹앱</span><span class="date">${date}</span></div>
-    <h3>${esc(r.title)}</h3><p>${esc(r.desc)}</p>
-    <div class="meta"><span>대상 <b>${esc(r.grade)}</b></span><span>만든 도구 <b>${esc(r.tool)}</b></span></div>
-    <div class="foot">${tags}<a class="open" href="${esc(r.url)}">열어 보기 →</a></div></article>`;
-  return `<article class="entry note">
-    <div class="top"><span class="kind">노하우</span><span class="date">${date}</span></div>
-    <h3>${esc(r.title)}</h3><p>${esc(r.desc)}</p>
-    <details><summary>글 전체</summary><div class="body">${r.body}</div></details>
-    <div class="foot">${tags}</div></article>`;
+  const date=(r.date||"").slice(5).replace("-",".");
+  const url=safeUrl(r.url);
+  const tags=`<div class="tags">${[r.subject,...(r.tags||[])].filter(Boolean).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`;
+  const edit=admin?`<button class="edit" type="button" data-edit="${esc(r.id)}">수정</button>`:"";
+  const top=`<div class="top"><span class="kind">${r.kind==="note"?"노하우":"웹앱"}</span><span class="date">${date}</span>${edit}</div>`;
+  if(r.kind!=="note"){
+    const link=url?`<a class="open" href="${esc(url)}" target="_blank" rel="noopener">열어 보기 →</a>`:`<span class="open none">링크 준비 중</span>`;
+    const meta=[r.grade&&`<span>대상 <b>${esc(r.grade)}</b></span>`,r.tool&&`<span>만든 도구 <b>${esc(r.tool)}</b></span>`].filter(Boolean).join("");
+    return `<article class="entry app">${top}<h3>${esc(r.title)}</h3>${r.desc?`<p>${esc(r.desc)}</p>`:""}
+      ${meta?`<div class="meta">${meta}</div>`:""}<div class="foot">${tags}${link}</div></article>`;
+  }
+  const link=url?`<a class="open" href="${esc(url)}" target="_blank" rel="noopener">관련 링크 →</a>`:"";
+  return `<article class="entry note">${top}<h3>${esc(r.title)}</h3>${r.desc?`<p>${esc(r.desc)}</p>`:""}
+    ${r.body?`<details><summary>글 전체</summary><div class="body">${bodyHtml(r.body)}</div></details>`:""}
+    <div class="foot">${tags}${link}</div></article>`;
 }
+function render(){renderFilters();renderList()}
+
+function setAdmin(on){
+  admin=on;
+  $("#adminbar").hidden=!on;
+  $("#adminBtn").textContent=on?"관리 끝내기":"관리";
+  render();
+}
+
+/* ---------- 편집 창 ---------- */
+const dlg=$("#dlg"), form=$("#form");
+$("#f-subject").innerHTML=SUBJECTS.map(s=>`<option>${s}</option>`).join("");
+let editing=null;
+function kindNow(){return form.querySelector('input[name=kind]:checked').value}
+function syncKind(){
+  const note=kindNow()==="note";
+  $("#appOnly").hidden=note; $("#bodyField").hidden=!note;
+  $("#urlLabel").textContent=note?"관련 링크":"앱 주소";
+  $("#urlHelp").textContent=note?"글과 함께 볼 자료나 앱 주소가 있으면 넣어 주세요.":"비워 두면 '링크 준비 중'으로 보여요.";
+}
+form.querySelectorAll('input[name=kind]').forEach(i=>i.addEventListener("change",syncKind));
+function openEditor(r){
+  editing=r||null;
+  $("#dlgTitle").textContent=r?"기록 수정":"새 기록";
+  (r&&r.kind==="note"?$("#f-kind-note"):$("#f-kind-app")).checked=true;
+  $("#f-title").value=r?.title||"";
+  $("#f-date").value=r?.date||new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
+  $("#f-subject").value=r?.subject||"만들기";
+  $("#f-desc").value=r?.desc||"";
+  $("#f-url").value=r?.url||"";
+  $("#f-grade").value=r?.grade||"";
+  $("#f-tool").value=r?.tool||"";
+  $("#f-tags").value=(r?.tags||[]).join(", ");
+  $("#f-body").value=r?.body||"";
+  $("#formMsg").hidden=true;
+  const d=$("#delBtn"); d.hidden=!r; d.classList.remove("sure"); d.textContent="삭제";
+  syncKind(); dlg.showModal(); $("#f-title").focus();
+}
+function closeEditor(){dlg.close();editing=null}
+$("#closeBtn").onclick=closeEditor; $("#cancelBtn").onclick=closeEditor;
+function formError(t){const m=$("#formMsg");m.textContent=t;m.hidden=false}
+form.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const kind=kindNow(), title=$("#f-title").value.trim(), url=$("#f-url").value.trim();
+  if(!title) return formError("제목을 적어 주세요."), $("#f-title").focus();
+  if(!$("#f-date").value) return formError("날짜를 골라 주세요.");
+  if(url&&!safeUrl(url)) return formError("주소는 https:// 로 시작해야 해요.");
+  const r={kind,title,date:$("#f-date").value,subject:$("#f-subject").value,desc:$("#f-desc").value.trim(),url,
+    tags:$("#f-tags").value.split(/[,，]/).map(s=>s.trim().replace(/^#/,"")).filter(Boolean)};
+  if(kind==="app"){r.grade=$("#f-grade").value.trim();r.tool=$("#f-tool").value.trim()} else {r.body=$("#f-body").value}
+  if(editing) r.id=editing.id;
+  const btn=$("#saveBtn"); btn.disabled=true; btn.textContent="저장 중…";
+  try{ await store.save(r); closeEditor(); render(); toast(editing?"수정했어요":"추가했어요"); }
+  catch(err){ formError("저장하지 못했어요. 관리 권한이 있는 계정으로 로그인했는지 확인해 주세요."); }
+  finally{ btn.disabled=false; btn.textContent="저장"; }
+});
+$("#delBtn").onclick=async()=>{
+  const d=$("#delBtn");
+  if(!d.classList.contains("sure")){d.classList.add("sure");d.textContent="한 번 더 누르면 삭제";return}
+  try{ await store.remove(editing.id); closeEditor(); render(); toast("삭제했어요"); }
+  catch(e){ formError("삭제하지 못했어요. 관리 권한을 확인해 주세요."); }
+};
+
+/* ---------- 이벤트 ---------- */
 $("#filters").addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b)return;
   if(b.dataset.kind) state.kind=b.dataset.kind;
   if(b.dataset.subject) state.subject=state.subject===b.dataset.subject?null:b.dataset.subject;
   try{localStorage.setItem("dk-filter",JSON.stringify(state))}catch(e){}
-  renderFilters();renderList();
+  render();
 });
-document.addEventListener("click",e=>{const a=e.target.closest('a.open[href="#"]');if(a){e.preventDefault();a.textContent="링크 연결 전";}});
-$("#nApp").textContent=RECORDS.filter(r=>r.kind==="app").length;
-$("#nNote").textContent=RECORDS.filter(r=>r.kind==="note").length;
-renderFilters();renderList();
+$("#list").addEventListener("click",e=>{
+  const b=e.target.closest("[data-edit]"); if(b) openEditor(records.find(r=>r.id===b.dataset.edit));
+});
+document.addEventListener("click",async e=>{
+  if(e.target.id==="seedBtn"){ try{await store.seed();toast("예시 기록을 넣었어요")}catch(err){toast("넣지 못했어요. 관리 권한을 확인해 주세요.")} }
+});
+$("#addBtn").onclick=()=>openEditor(null);
+async function exitAdmin(){ await store.logout(); setAdmin(false); }
+$("#exitBtn").onclick=exitAdmin;
+$("#adminBtn").onclick=async()=>{
+  if(admin) return exitAdmin();
+  try{ await store.login(); if(store.mode==="preview") setAdmin(true); }
+  catch(e){ toast("로그인하지 못했어요. 다시 시도해 주세요."); }
+};
+
+if(store.mode==="preview"){
+  showNotice("미리보기 모드예요. 아래 '관리'를 누르면 바로 추가·수정해 볼 수 있고, 기록은 이 브라우저에만 저장돼요. 견본 글은 예시예요.");
+}
+store.start(render);
 </script>
 </body>
 </html>
