@@ -329,6 +329,14 @@ function firebaseStore(){
   };
 }
 
+/* 실패 이유를 알기 쉽게 */
+function why(err){
+  const code=String(err&&(err.code||err.message)||"").toUpperCase();
+  const email=(window.firebase&&firebase.auth&&firebase.auth().currentUser&&firebase.auth().currentUser.email)||"";
+  if(code.includes("PERMISSION")) return `쓰기 권한이 없어요. 지금 로그인한 계정은 ${email||"(확인 안 됨)"} 이에요. Realtime Database 규칙의 메일 주소가 이 계정과 똑같은지, 규칙을 '게시'했는지 확인해 주세요.`;
+  if(code.includes("NETWORK")||code.includes("DISCONNECT")) return "인터넷 연결이 끊겨서 저장하지 못했어요. 연결을 확인하고 다시 눌러 주세요.";
+  return "저장하지 못했어요. 오류: "+(err&&(err.code||err.message)||"알 수 없음");
+}
 /* ---------- 화면 ---------- */
 function showNotice(t){const n=$("#notice");n.textContent=t;n.hidden=!t}
 function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2200)}
@@ -434,14 +442,14 @@ form.addEventListener("submit",async e=>{
   if(editing) r.id=editing.id;
   const btn=$("#saveBtn"); btn.disabled=true; btn.textContent="저장 중…";
   try{ await store.save(r); closeEditor(); render(); toast(editing?"수정했어요":"추가했어요"); }
-  catch(err){ formError("저장하지 못했어요. 관리 권한이 있는 계정으로 로그인했는지 확인해 주세요."); }
+  catch(err){ formError(why(err)); }
   finally{ btn.disabled=false; btn.textContent="저장"; }
 });
 $("#delBtn").onclick=async()=>{
   const d=$("#delBtn");
   if(!d.classList.contains("sure")){d.classList.add("sure");d.textContent="한 번 더 누르면 삭제";return}
   try{ await store.remove(editing.id); closeEditor(); render(); toast("삭제했어요"); }
-  catch(e){ formError("삭제하지 못했어요. 관리 권한을 확인해 주세요."); }
+  catch(e){ formError(why(e)); }
 };
 
 /* ---------- 이벤트 ---------- */
@@ -456,7 +464,7 @@ $("#list").addEventListener("click",e=>{
   const b=e.target.closest("[data-edit]"); if(b) openEditor(records.find(r=>r.id===b.dataset.edit));
 });
 document.addEventListener("click",async e=>{
-  if(e.target.id==="seedBtn"){ try{await store.seed();toast("예시 기록을 넣었어요")}catch(err){toast("넣지 못했어요. 관리 권한을 확인해 주세요.")} }
+  if(e.target.id==="seedBtn"){ try{await store.seed();toast("예시 기록을 넣었어요");showNotice("")}catch(err){showNotice(why(err))} }
 });
 $("#addBtn").onclick=()=>openEditor(null);
 async function exitAdmin(){ await store.logout(); setAdmin(false); }
