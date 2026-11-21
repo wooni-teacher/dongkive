@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="신동운 선생님이 교실에서 쓰려고 만든 웹앱과 수업 노하우를 모아 두는 기록장">
+<meta name="description" content="교실에서 쓰려고 만든 웹앱과 수업 노하우를 모아 두는 기록장">
 <style>[hidden]{display:none!important}body{margin:0}</style>
 <title>동카이브</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -104,7 +104,6 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-si
 
   <header>
     <div>
-      <div class="eyebrow">반월초 · 5·6학년 · 신동운</div>
       <h1><span class="hl">동카이브</span></h1>
       <p class="intro">교실에서 쓰려고 만든 웹앱과, 만들고 수업하며 배운 것을 시간 순서대로 쌓아 두는 곳입니다.</p>
     </div>
@@ -126,7 +125,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-si
    kind: "app"(웹앱) 또는 "note"(노하우)
    subject: 국어 · 영어 · 사회 · 실과 · 학급운영 · 행사 · 만들기 */
 const RECORDS = [
-  {kind:"app", date:"2026-11-06", subject:"실과", title:"반월봇",
+  {kind:"app", date:"2026-11-06", subject:"실과", title:"실과 AI 튜터봇",
    desc:"6학년 실과 시간에 묻고 답하는 AI 튜터 챗봇.",
    grade:"6학년", tool:"Apps Script", tags:["AI","챗봇","정보연수"], url:"#"},
   {kind:"app", date:"2026-11-04", subject:"실과", title:"과목별 단어봇",
@@ -135,7 +134,7 @@ const RECORDS = [
   {kind:"note", date:"2026-11-03", subject:"만들기", title:"Apps Script로 챗봇을 만들 때 먼저 정해 둔 세 가지",
    desc:"수업용 챗봇은 기능보다 '무엇을 안 할지'를 먼저 정해야 했다.",
    tags:["AI","챗봇"],
-   body:`<p>(예시 글) 반월봇을 만들며 처음부터 정해 두니 편했던 것들입니다.</p>
+   body:`<p>(예시 글) AI 튜터봇을 만들며 처음부터 정해 두니 편했던 것들입니다.</p>
    <ol><li><b>답을 바로 주지 않기</b>: 힌트 → 질문 → 정답 순서로.</li>
    <li><b>범위 정하기</b>: 단원 밖 질문은 정중하게 돌려보내기.</li>
    <li><b>기록 남기기</b>: 학생이 자주 묻는 질문을 시트에 쌓아 다음 수업에 반영.</li></ol>`},
